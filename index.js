@@ -2,7 +2,11 @@
 Tiling Calculator
 Forest Tong
 **/
-//TODO: make busy symbol when calculating
+//TODO: adjust grid size
+//button for stopping calculation
+//Some way of recording numbers
+//Explanation of how to use it
+//better way of showing busy
 
 var padding = 1;
 var nodeRadius = 7;
@@ -13,15 +17,17 @@ var pickedColor = '#A0C4EB';
 var nodeSelectColor = 'rgba(255, 153, 0, 0.4)';
 var tileSelectColor = nodeSelectColor;
 var invis = 'rgba(0, 0, 0, 0)';
-var l = 100;
-var h = 6;
-var w = 6;
+var boardWidth = 1010;
+var boardHeight = boardWidth;
+var h = 10;
+var w = 10;
+var l = (boardWidth - w*padding)/w;
 
 var tableRects = [];
 var tableNodes = [];
 var svg = document.getElementById('board');
-svg.setAttribute('height', 2*margin + h*(padding + l));
-svg.setAttribute('width', 2*margin + w*(padding + l));
+svg.setAttribute('height', 2*margin + boardHeight);
+svg.setAttribute('width', 2*margin + boardWidth);
 var svgNS = svg.namespaceURI;
 
 var selectedNode = null; //only valid when selectingNode
@@ -105,18 +111,33 @@ function computeTilings() {
 			}
 		}
 	}
-	//One of these will be zero
-	return Math.abs(math.det(math.matrix(K)).re) + Math.abs(math.det(math.matrix(K)).im);
+
+	var numTilings = math.det(math.matrix(K));
+	if(typeof numTilings == "number") {
+		return numTilings;
+	} else {
+		//One of these will be zero
+		return Math.abs(numTilings.re) + Math.abs(numTilings.im);
+	}
+
 }
 
 function click(i, j) {
-	var rect = tableRects[i][j]
+	var rect = tableRects[i][j];
+	if(!rect.tiled) {
+		rect.tiled = 1;
+		formatColorRect(rect);
+	}
+}
+
+function toggleClick(i, j) {
+	var rect = tableRects[i][j];
 	if(rect.tiled) {
 		rect.tiled = 0;
 	} else {
 		rect.tiled = 1;
 	}
-	formatColor(rect);
+	formatColorRect(rect);
 }
 
 function clickDiamond(node1, node2) {
@@ -124,7 +145,9 @@ function clickDiamond(node1, node2) {
 	var p2 = [node2.i, node2.j];
 	for(var i = 0; i < h; i++) {
 		for(var j = 0; j < w; j++) {
-			if(inDiamond(p1, p2, [i + .5, j + .5])) click(i, j);
+			if(inDiamond(p1, p2, [i + .5, j + .5])) {
+				click(i, j);
+			}
 		}
 	}
 }
@@ -165,12 +188,12 @@ function clear() {
 	for(var i = 0; i < h; i++) {
 		for(var j = 0; j < w; j++) {
 			tableRects[i][j].tiled = 0;
-			formatColor(tableRects[i][j]);
+			formatColorRect(tableRects[i][j]);
 		}
 	}
 }
 
-function formatColor(rect) {
+function formatColorRect(rect) {
 	if(rect.toTile) {
 		rect.setAttribute('fill', tileSelectColor);
 	} else {
@@ -182,8 +205,16 @@ function formatColor(rect) {
 	}
 }
 
-$(document).ready(function() {
-	for(var i = 0; i < h; i++) {
+function formatColorNode(node) {
+	if(node.highlighted || node.clicked) {
+		node.setAttribute('fill', nodeSelectColor);
+	} else {
+		node.setAttribute('fill', invis);
+	}
+}
+
+function generateSVG() {
+		for(var i = 0; i < h; i++) {
 		rowRects = [];
 		for(var j = 0; j < w; j++) {
 			var rect = document.createElementNS(svgNS,'rect');
@@ -197,33 +228,35 @@ $(document).ready(function() {
 			rect.tiled = 0;
 			//Toggles upon click when selectingTile
 			rect.toTile = false;
-			formatColor(rect);
+			formatColorRect(rect);
 			rect.onmouseover = function(e) {
-				if(nodeKeyDown)
-					rect.toTile = true;
-					formatColor(rect);
+				// if(tileKeyDown) {
+				// 	e.target.toTile = true;
+				// 	formatColorRect(e.target);
+				// }
 			};
 			rect.onmouseout = function(e) {
-				if(nodeKeyDown) {
-					rect.toTile = false;
-					formatColor(rect);
-				}
+				// if(tileKeyDown) {
+				// 	e.target.toTile = false;
+				// 	formatColorRect(e.target);
+				// }
 			};
 			rect.onclick = (function handleClick(i, j) {
 				return function(e) {
+					l = 50;
 					if(tileKeyDown) {
 						if(!selectingTile) {
 							selectingTile = true;
 							selectedTile = e.target;
 							selectedTile.toTile = true;
-							formatColor(selectedTile);
+							formatColorRect(selectedTile);
 						} else {
 							selectingTile = false;
 							selectedTile.toTile = false;
 							clickRect(selectedTile, e.target);
 						}
 					} else {
-						click(i, j);
+						toggleClick(i, j);
 					}
 				};
 			})(i, j);
@@ -237,26 +270,38 @@ $(document).ready(function() {
 		rowNodes = [];
 		for(var j = 0; j < w + 1; j++) {
 			var node = document.createElementNS(svgNS, 'circle');
-			node.setAttribute('i', i);
-			node.setAttribute('j', j);
 			node.setAttribute('cx', margin + j*(l + padding));
 			node.setAttribute('cy', margin + i*(l + padding));
 			node.setAttribute('r', nodeRadius);
 			node.setAttribute('fill', invis);
-			node.onmouseover = function(e) {if(nodeKeyDown) e.target.setAttribute('fill', nodeSelectColor);};
+			node.i = i;
+			node.j = j;
+			node.highlighted = false;
+			node.clicked = false;
+			node.onmouseover = function(e) {
+				if(nodeKeyDown) {
+					e.target.highlighted = true;
+					formatColorNode(e.target);
+				}
+			};
 			node.onmouseout = function(e) {
-				if(e.target != selectedNode) e.target.setAttribute('fill', invis);
+				if(e.target.highlighted) {
+					e.target.highlighted = false;
+					formatColorNode(e.target);
+				}
 			};
 			node.onclick = function(e) {
 				if(nodeKeyDown) {
 					if(!selectingNode) {
 						selectingNode = true;
 						selectedNode = e.target;
+						selectedNode.clicked = true;
+						formatColorNode(selectedNode);
 					} else {
 						selectingNode = false;
+						selectedNode.clicked = false;
+						formatColorNode(selectedNode);
 						clickDiamond(selectedNode, e.target);
-						selectedNode.setAttribute('fill', invis);
-						selectedNode = null;
 					}
 				}
 			}
@@ -267,9 +312,20 @@ $(document).ready(function() {
 	}
 
 	document.body.appendChild(svg);
-	$('#calculator').click(function() {
-		var tilings = computeTilings();  
+}
+
+$(document).ready(function() {
+	generateSVG();
+
+	var calculateTilings = function() {
+		var tilings = computeTilings();
 		document.getElementById("result").innerHTML = "Number of Tilings: " + tilings;
+	}
+	$('#calculator').click(function() {
+		(function(callback) {
+			document.getElementById("result").innerHTML = "Number of Tilings: ";
+			$.ajax({complete: calculateTilings});
+		})(calculateTilings);
 	});
 	$('#clear').click(clear);
 
@@ -280,9 +336,9 @@ $(document).ready(function() {
 	$(document).keyup(function(e) {
 		if(e.which == nodeKey) {
 			if(selectedNode) {
-				selectedNode.setAttribute('fill', invis);
-				selectedNode = null;
 				selectingNode = false;
+				selectedNode.clicked = false;
+				formatColorNode(selectedNode);
 			}
 			nodeKeyDown = false;
 		}
@@ -290,7 +346,7 @@ $(document).ready(function() {
 			if(selectedTile) {
 				selectedTile.toTile = false;
 				selectingTile = false;
-				formatColor(selectedTile);
+				formatColorRect(selectedTile);
 			}
 			tileKeyDown = false;
 		}
