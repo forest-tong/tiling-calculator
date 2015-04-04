@@ -23,8 +23,6 @@ var h = 10;
 var w = 10;
 var l = (boardWidth - w*padding)/w;
 
-var tableRects = [];
-var tableNodes = [];
 var svg = document.getElementById('board');
 svg.setAttribute('height', 2*margin + boardHeight);
 svg.setAttribute('width', 2*margin + boardWidth);
@@ -40,12 +38,193 @@ var nodeKeyDown = false;
 var tileKeyDown = false;
 var mouseDown = false;
 
-function computeTilings() {
+function Grid(h, w) {
+	this.h = h;
+	this.w = w;
+	this.tableRects = [];
+	this.tableNodes = [];
+	for(var i = 0; i < h; i++) {
+		var rowRects = [];
+		for(var j = 0; j < w; j++) {
+			var rect = document.createElementNS(svgNS,'rect');
+			rect.i = i;
+			rect.j = j;
+			//Toggles upon click
+			rect.tiled = 0;
+			//Toggles upon click when selectingTile
+			rect.toTile = false;
+			formatColorRect(rect);
+			rect.onmouseover = function(e) {
+				// if(tileKeyDown) {
+				// 	e.target.toTile = true;
+				// 	formatColorRect(e.target);
+				// }
+			};
+			rect.onmouseout = function(e) {
+				// if(tileKeyDown) {
+				// 	e.target.toTile = false;
+				// 	formatColorRect(e.target);
+				// }
+			};
+			rect.onclick = function(e) {
+				if(tileKeyDown) {
+					if(!selectingTile) {
+						selectingTile = true;
+						selectedTile = e.target;
+						selectedTile.toTile = true;
+						formatColorRect(selectedTile);
+					} else {
+						selectingTile = false;
+						selectedTile.toTile = false;
+						clickRect(selectedTile, e.target);
+					}
+				} else {
+					toggleClick(e.target);
+				}
+			};
+			rowRects.push(rect);
+		}
+		tableRects.push(rowRects);
+	}
+
+	for(var i = 0; i < h + 1; i++) {
+		var rowNodes = [];
+		for(var j = 0; j < w + 1; j++) {
+			var node = document.createElementNS(svgNS, 'circle');
+			node.setAttribute('cx', margin + j*(l + padding));
+			node.setAttribute('cy', margin + i*(l + padding));
+			node.setAttribute('r', nodeRadius);
+			node.setAttribute('fill', invis);
+			node.p = (i, j);
+			node.highlighted = false;
+			node.clicked = false;
+			node.onmouseover = function(e) {
+				if(nodeKeyDown) {
+					e.target.highlighted = true;
+					formatColorNode(e.target);
+				}
+			};
+			node.onmouseout = function(e) {
+				if(e.target.highlighted) {
+					e.target.highlighted = false;
+					formatColorNode(e.target);
+				}
+			};
+			node.onclick = function(e) {
+				if(nodeKeyDown) {
+					if(!selectingNode) {
+						selectingNode = true;
+						selectedNode = e.target;
+						selectedNode.clicked = true;
+						formatColorNode(selectedNode);
+					} else {
+						selectingNode = false;
+						selectedNode.clicked = false;
+						formatColorNode(selectedNode);
+						clickDiamond(selectedNode, e.target);
+					}
+				}
+			}
+			rowNodes.push(node);
+		}
+		tableNodes.push(rowNodes);
+	}
+}
+
+Grid.prototype.formatColorRect = function(rect) {
+	if(rect.toTile) {
+		rect.setAttribute('fill', tileSelectColor);
+	} else {
+		if(rect.tiled) {
+			rect.setAttribute('fill', pickedColor);
+		} else {
+			rect.setAttribute('fill', backgroundColor);
+		}
+	}
+}
+
+Grid.prototype.formatColorNode = function(node) {
+	if(node.highlighted || node.clicked) {
+		node.setAttribute('fill', nodeSelectColor);
+	} else {
+		node.setAttribute('fill', invis);
+	}
+}
+
+Grid.prototype.click = function(rect) {
+	if(!rect.tiled) {
+		rect.tiled = 1;
+		formatColorRect(rect);
+	}
+}
+
+Grid.prototype.toggleClick = function(rect) {
+	if(rect.tiled) {
+		rect.tiled = 0;
+	} else {
+		rect.tiled = 1;
+	}
+	formatColorRect(rect);
+}
+
+Grid.prototype.clear = function() {
+	for(var i = 0; i < h; i++) {
+		for(var j = 0; j < w; j++) {
+			tableRects[i][j].tiled = 0;
+			formatColorRect(tableRects[i][j]);
+		}
+	}
+}
+
+Grid.prototype.inRect = function(p1, p2, p) {
+	var x1 = p1[0];
+	var y1 = p1[1];
+	var x2 = p2[0];
+	var y2 = p2[1];
+	var x = p[0];
+	var y = p[1];
+	return x <= Math.max(x1, x2) && x >= Math.min(x1, x2) 
+	&& y <= Math.max(y1, y2) && y >= Math.min(y1, y2);
+}
+
+//p is within diamond with corners p1 and p2
+Grid.prototype.inDiamond = function(p1, p2, p) {
+	return inRect(rotateScale(p1), rotateScale(p2), rotateScale(p));
+}
+
+//Rotates by 45 and scales
+Grid.prototype.rotateScale = function(p) {
+	var qx = p[0] + p[1];
+	var qy = -p[0] + p[1];
+	return [qx, qy];
+}
+
+Grid.prototype.clickRect = function(rect1, rect2) {
+	var p1 = [rect1.i + .5, rect1.j + .5];
+	var p2 = [rect2.i + .5, rect2.j + .5];
+	for(var i = 0; i < h; i++) {
+		for(var j = 0; j < w; j++) {
+			if(inRect(p1, p2, [i + .5, j + .5])) click(tableRects[i][j]);
+		}
+	}
+}
+
+Grid.prototype.clickDiamond = function(node1, node2) {
+	for(var i = 0; i < h; i++) {
+		for(var j = 0; j < w; j++) {
+			if(inDiamond(node1.p, node2.p, [i + .5, j + .5])) {
+				click(tableRects[i][j]);
+			}
+		}
+	}
+}
+
+Grid.prototype.computeTilings = function() {
 	var table = [];
 	for(var i = 0; i < h; i++) {
 		var row = [];
 		for(var j = 0; j < w; j++) {
-			row.push(tableRects[i][j].tiled);
+			row.push(this.tableRects[i][j].tiled);
 		}
 		table.push(row);
 	}
@@ -122,194 +301,14 @@ function computeTilings() {
 
 }
 
-function click(i, j) {
-	var rect = tableRects[i][j];
-	if(!rect.tiled) {
-		rect.tiled = 1;
-		formatColorRect(rect);
-	}
-}
-
-function toggleClick(i, j) {
-	var rect = tableRects[i][j];
-	if(rect.tiled) {
-		rect.tiled = 0;
-	} else {
-		rect.tiled = 1;
-	}
-	formatColorRect(rect);
-}
-
-function clickDiamond(node1, node2) {
-	var p1 = [node1.i, node1.j];
-	var p2 = [node2.i, node2.j];
-	for(var i = 0; i < h; i++) {
-		for(var j = 0; j < w; j++) {
-			if(inDiamond(p1, p2, [i + .5, j + .5])) {
-				click(i, j);
-			}
-		}
-	}
-}
-
-function clickRect(rect1, rect2) {
-	var p1 = [rect1.i + .5, rect1.j + .5];
-	var p2 = [rect2.i + .5, rect2.j + .5];
-	for(var i = 0; i < h; i++) {
-		for(var j = 0; j < w; j++) {
-			if(inRect(p1, p2, [i + .5, j + .5])) click(i, j);
-		}
-	}
-}
-
-//p is within diamond with corners p1 and p2
-function inDiamond(p1, p2, p) {
-	return inRect(rotateScale(p1), rotateScale(p2), rotateScale(p));
-}
-
-function inRect(p1, p2, p) {
-	var x1 = p1[0];
-	var y1 = p1[1];
-	var x2 = p2[0];
-	var y2 = p2[1];
-	var x = p[0];
-	var y = p[1];
-	return x <= Math.max(x1, x2) && x >= Math.min(x1, x2) && y <= Math.max(y1, y2) && y >= Math.min(y1, y2);
-}
-
-//Rotates by 45 and scales
-function rotateScale(p) {
-	var qx = p[0] + p[1];
-	var qy = -p[0] + p[1];
-	return [qx, qy];
-}
-
-function clear() {
-	for(var i = 0; i < h; i++) {
-		for(var j = 0; j < w; j++) {
-			tableRects[i][j].tiled = 0;
-			formatColorRect(tableRects[i][j]);
-		}
-	}
-}
-
-function formatColorRect(rect) {
-	if(rect.toTile) {
-		rect.setAttribute('fill', tileSelectColor);
-	} else {
-		if(rect.tiled) {
-			rect.setAttribute('fill', pickedColor);
-		} else {
-			rect.setAttribute('fill', backgroundColor);
-		}
-	}
-}
-
-function formatColorNode(node) {
-	if(node.highlighted || node.clicked) {
-		node.setAttribute('fill', nodeSelectColor);
-	} else {
-		node.setAttribute('fill', invis);
-	}
-}
-
 function generateSVG() {
-		for(var i = 0; i < h; i++) {
-		rowRects = [];
-		for(var j = 0; j < w; j++) {
-			var rect = document.createElementNS(svgNS,'rect');
-			rect.setAttribute('x', margin + j*(l + padding));
-			rect.setAttribute('y', margin + i*(l + padding));
-			rect.setAttribute('width', l);
-			rect.setAttribute('height', l);
-			rect.i = i;
-			rect.j = j;
-			//Toggles upon click
-			rect.tiled = 0;
-			//Toggles upon click when selectingTile
-			rect.toTile = false;
-			formatColorRect(rect);
-			rect.onmouseover = function(e) {
-				// if(tileKeyDown) {
-				// 	e.target.toTile = true;
-				// 	formatColorRect(e.target);
-				// }
-			};
-			rect.onmouseout = function(e) {
-				// if(tileKeyDown) {
-				// 	e.target.toTile = false;
-				// 	formatColorRect(e.target);
-				// }
-			};
-			rect.onclick = (function handleClick(i, j) {
-				return function(e) {
-					l = 50;
-					if(tileKeyDown) {
-						if(!selectingTile) {
-							selectingTile = true;
-							selectedTile = e.target;
-							selectedTile.toTile = true;
-							formatColorRect(selectedTile);
-						} else {
-							selectingTile = false;
-							selectedTile.toTile = false;
-							clickRect(selectedTile, e.target);
-						}
-					} else {
-						toggleClick(i, j);
-					}
-				};
-			})(i, j);
-			svg.appendChild(rect);
-			rowRects.push(rect);
-		}
-		tableRects.push(rowRects);
-	}
+	//set rects
+	rect.setAttribute('x', margin + j*(l + padding));
+	rect.setAttribute('y', margin + i*(l + padding));
+	rect.setAttribute('width', l);
+	rect.setAttribute('height', l);
 
-	for(var i = 0; i < h + 1; i++) {
-		rowNodes = [];
-		for(var j = 0; j < w + 1; j++) {
-			var node = document.createElementNS(svgNS, 'circle');
-			node.setAttribute('cx', margin + j*(l + padding));
-			node.setAttribute('cy', margin + i*(l + padding));
-			node.setAttribute('r', nodeRadius);
-			node.setAttribute('fill', invis);
-			node.i = i;
-			node.j = j;
-			node.highlighted = false;
-			node.clicked = false;
-			node.onmouseover = function(e) {
-				if(nodeKeyDown) {
-					e.target.highlighted = true;
-					formatColorNode(e.target);
-				}
-			};
-			node.onmouseout = function(e) {
-				if(e.target.highlighted) {
-					e.target.highlighted = false;
-					formatColorNode(e.target);
-				}
-			};
-			node.onclick = function(e) {
-				if(nodeKeyDown) {
-					if(!selectingNode) {
-						selectingNode = true;
-						selectedNode = e.target;
-						selectedNode.clicked = true;
-						formatColorNode(selectedNode);
-					} else {
-						selectingNode = false;
-						selectedNode.clicked = false;
-						formatColorNode(selectedNode);
-						clickDiamond(selectedNode, e.target);
-					}
-				}
-			}
-			svg.appendChild(node);
-			rowNodes.push(node);
-		}
-		tableNodes.push(rowNodes);
-	}
+	//svg.appendChild
 
 	document.body.appendChild(svg);
 }
