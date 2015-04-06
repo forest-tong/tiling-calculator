@@ -21,7 +21,6 @@ var boardWidth = 1010;
 var boardHeight = boardWidth;
 var h = 10;
 var w = 10;
-var l = (boardWidth - w*padding)/w;
 
 var grid;
 
@@ -48,6 +47,7 @@ var Grid = function(h, w) {
 	for(var i = 0; i < h; i++) {
 		var rowRects = [];
 		for(var j = 0; j < w; j++) {
+			var l = (boardWidth - w*padding)/w;
 			var rect = document.createElementNS(svgNS,'rect');
 			rect.setAttribute('x', margin + j*(l + padding));
 			rect.setAttribute('y', margin + i*(l + padding));
@@ -174,7 +174,7 @@ Grid.prototype.clear = function() {
 	for(var i = 0; i < h; i++) {
 		for(var j = 0; j < w; j++) {
 			this.tableRects[i][j].tiled = 0;
-			this.formatColorRect(tableRects[i][j]);
+			this.formatColorRect(this.tableRects[i][j]);
 		}
 	}
 }
@@ -224,7 +224,7 @@ Grid.prototype.clickDiamond = function(node1, node2) {
 	}
 }
 
-Grid.prototype.computeTilings = function() {
+Grid.prototype.returnTiled = function() {
 	var table = [];
 	for(var i = 0; i < h; i++) {
 		var row = [];
@@ -233,6 +233,11 @@ Grid.prototype.computeTilings = function() {
 		}
 		table.push(row);
 	}
+	return table;
+}
+
+Grid.prototype.computeTilings = function() {
+	var table = this.returnTiled();
 
 	var labels = [];
 	for(var i = 0; i < h; i++) {
@@ -306,24 +311,36 @@ Grid.prototype.computeTilings = function() {
 
 }
 
-function generateSVG() {
-	grid = new Grid(h, w);
+function addGrid(grid) {
+	for(var i = 0; i < grid.tableRects.length; i++) {
+		for(var j = 0; j < grid.tableRects[0].length; j++) {
+			svg.appendChild(grid.tableRects[i][j]);
+		}
+	}
+	for(var i = 0; i < grid.tableNodes.length; i++) {
+		for(var j = 0; j < grid.tableNodes[0].length; j++) {
+			svg.appendChild(grid.tableNodes[i][j]);
+		}
+	}
+}
+
+function removeGrid(grid) {
 	for(var i = 0; i < h; i++) {
 		for(var j = 0; j < w; j++) {
-			svg.appendChild(grid.tableRects[i][j]);
+			svg.removeChild(grid.tableRects[i][j]);
 		}
 	}
 	for(var i = 0; i < h + 1; i++) {
 		for(var j = 0; j < w + 1; j++) {
-			svg.appendChild(grid.tableNodes[i][j]);
+			svg.removeChild(grid.tableNodes[i][j]);
 		}
 	}
-
-	document.body.appendChild(svg);
 }
 
 $(document).ready(function() {
-	generateSVG();
+	grid = new Grid(h, w);
+	addGrid(grid);
+	document.body.appendChild(svg);
 
 	var calculateTilings = function() {
 		var tilings = grid.computeTilings();
@@ -335,7 +352,44 @@ $(document).ready(function() {
 			$.ajax({complete: calculateTilings});
 		})(calculateTilings);
 	});
-	$('#clear').click(clear);
+	$('#clear').click(function() {
+		grid.clear();
+	});
+
+	$('#increase').click(function() {
+		removeGrid(grid);
+		document.body.removeChild(svg);
+
+		var table = grid.returnTiled();
+		h++; w++;
+		grid = new Grid(h, w);
+		for(var i = 0; i < h - 1; i++) {
+			for(var j = 0; j < w - 1; j++) {
+				grid.tableRects[i][j].tiled = table[i][j];
+				grid.formatColorRect(grid.tableRects[i][j]);
+			}
+		}
+		addGrid(grid);
+		document.body.appendChild(svg);
+	})
+	$('#decrease').click(function() {
+		if(h > 0 && w > 0) {
+			removeGrid(grid);
+			document.body.removeChild(svg);
+
+			var table = grid.returnTiled();
+			h--; w--;
+			grid = new Grid(h, w);
+			for(var i = 0; i < h; i++) {
+				for(var j = 0; j < w; j++) {
+					grid.tableRects[i][j].tiled = table[i][j];
+					grid.formatColorRect(grid.tableRects[i][j]);
+				}
+			}
+			addGrid(grid);
+			document.body.appendChild(svg);
+		}
+	})
 
 	$(document).keydown(function(e) {
 		if(e.which == nodeKey) nodeKeyDown = true;
