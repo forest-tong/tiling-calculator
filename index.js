@@ -74,6 +74,7 @@ var Grid = function(h, w) {
 						} else {
 							selectingTile = false;
 							selectedTile.toTile = false;
+							grid.formatColorRect(selectedTile);
 							grid.clickRect(selectedTile, e.target);
 						}
 					} else {
