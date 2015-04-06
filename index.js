@@ -2,7 +2,7 @@
 Tiling Calculator
 Forest Tong
 **/
-//TODO: adjust grid size
+//TODO:
 //button for stopping calculation
 //Some way of recording numbers
 //Explanation of how to use it
@@ -33,8 +33,11 @@ var selectedNode = null; //only valid when selectingNode
 var selectedTile = null; //only valid when selectingTile
 var selectingNode = false;
 var selectingTile =false;
+// var nodeKey = 68;
+// var tileKey = 82;
 var nodeKey = 16;
 var tileKey = 91;
+var calculateKey = 13;
 var nodeKeyDown = false;
 var tileKeyDown = false;
 var mouseDown = false;
@@ -236,7 +239,7 @@ Grid.prototype.returnTiled = function() {
 	return table;
 }
 
-Grid.prototype.computeTilings = function() {
+Grid.prototype.calculateTilings = function() {
 	var table = this.returnTiled();
 
 	var labels = [];
@@ -337,20 +340,21 @@ function removeGrid(grid) {
 	}
 }
 
+var showTilingCalculation = function() {
+	var tilings = grid.calculateTilings();
+	document.getElementById("result").innerHTML = "Number of Tilings: " + tilings;
+}
+
 $(document).ready(function() {
 	grid = new Grid(h, w);
 	addGrid(grid);
 	document.body.appendChild(svg);
 
-	var calculateTilings = function() {
-		var tilings = grid.computeTilings();
-		document.getElementById("result").innerHTML = "Number of Tilings: " + tilings;
-	}
 	$('#calculator').click(function() {
 		(function(callback) {
 			document.getElementById("result").innerHTML = "Number of Tilings: ";
-			$.ajax({complete: calculateTilings});
-		})(calculateTilings);
+			$.ajax({complete: showTilingCalculation});
+		})(showTilingCalculation);
 	});
 	$('#clear').click(function() {
 		grid.clear();
@@ -394,6 +398,12 @@ $(document).ready(function() {
 	$(document).keydown(function(e) {
 		if(e.which == nodeKey) nodeKeyDown = true;
 		if(e.which == tileKey) tileKeyDown = true;
+		if(e.which == calculateKey) {
+			(function(callback) {
+				document.getElementById("result").innerHTML = "Number of Tilings: ";
+				$.ajax({complete: showTilingCalculation});
+			})(showTilingCalculation);
+		}
 	})
 	$(document).keyup(function(e) {
 		if(e.which == nodeKey) {
