@@ -91,7 +91,8 @@ var Grid = function(h, w) {
 			node.setAttribute('cy', margin + i*(l + padding));
 			node.setAttribute('r', nodeRadius);
 			node.setAttribute('fill', invis);
-			node.p = (i, j);
+			node.i = i;
+			node.j = j;
 			node.highlighted = false;
 			node.clicked = false;
 			node.onmouseover = (function(grid) {
@@ -212,9 +213,11 @@ Grid.prototype.clickRect = function(rect1, rect2) {
 }
 
 Grid.prototype.clickDiamond = function(node1, node2) {
+	var p1 = [node1.i, node1.j];
+	var p2 = [node2.i, node2.j];
 	for(var i = 0; i < h; i++) {
 		for(var j = 0; j < w; j++) {
-			if(this.inDiamond(node1.p, node2.p, [i + .5, j + .5])) {
+			if(this.inDiamond(p1, p2, [i + .5, j + .5])) {
 				this.click(this.tableRects[i][j]);
 			}
 		}
