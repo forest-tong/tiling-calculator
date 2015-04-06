@@ -23,6 +23,8 @@ var h = 10;
 var w = 10;
 var l = (boardWidth - w*padding)/w;
 
+var grid;
+
 var svg = document.getElementById('board');
 svg.setAttribute('height', 2*margin + boardHeight);
 svg.setAttribute('width', 2*margin + boardWidth);
@@ -38,7 +40,7 @@ var nodeKeyDown = false;
 var tileKeyDown = false;
 var mouseDown = false;
 
-function Grid(h, w) {
+var Grid = function(h, w) {
 	this.h = h;
 	this.w = w;
 	this.tableRects = [];
@@ -47,44 +49,38 @@ function Grid(h, w) {
 		var rowRects = [];
 		for(var j = 0; j < w; j++) {
 			var rect = document.createElementNS(svgNS,'rect');
+			rect.setAttribute('x', margin + j*(l + padding));
+			rect.setAttribute('y', margin + i*(l + padding));
+			rect.setAttribute('width', l);
+			rect.setAttribute('height', l);
 			rect.i = i;
 			rect.j = j;
 			//Toggles upon click
 			rect.tiled = 0;
 			//Toggles upon click when selectingTile
 			rect.toTile = false;
-			formatColorRect(rect);
-			rect.onmouseover = function(e) {
-				// if(tileKeyDown) {
-				// 	e.target.toTile = true;
-				// 	formatColorRect(e.target);
-				// }
-			};
-			rect.onmouseout = function(e) {
-				// if(tileKeyDown) {
-				// 	e.target.toTile = false;
-				// 	formatColorRect(e.target);
-				// }
-			};
-			rect.onclick = function(e) {
-				if(tileKeyDown) {
-					if(!selectingTile) {
-						selectingTile = true;
-						selectedTile = e.target;
-						selectedTile.toTile = true;
-						formatColorRect(selectedTile);
+			this.formatColorRect(rect);
+			rect.onclick = (function(grid) {
+				return function(e) {
+					if(tileKeyDown) {
+						if(!selectingTile) {
+							selectingTile = true;
+							selectedTile = e.target;
+							selectedTile.toTile = true;
+							grid.formatColorRect(selectedTile);
+						} else {
+							selectingTile = false;
+							selectedTile.toTile = false;
+							grid.clickRect(selectedTile, e.target);
+						}
 					} else {
-						selectingTile = false;
-						selectedTile.toTile = false;
-						clickRect(selectedTile, e.target);
+						grid.toggleClick(e.target);
 					}
-				} else {
-					toggleClick(e.target);
-				}
-			};
+				};
+			})(this);
 			rowRects.push(rect);
 		}
-		tableRects.push(rowRects);
+		this.tableRects.push(rowRects);
 	}
 
 	for(var i = 0; i < h + 1; i++) {
@@ -98,36 +94,42 @@ function Grid(h, w) {
 			node.p = (i, j);
 			node.highlighted = false;
 			node.clicked = false;
-			node.onmouseover = function(e) {
-				if(nodeKeyDown) {
-					e.target.highlighted = true;
-					formatColorNode(e.target);
-				}
-			};
-			node.onmouseout = function(e) {
-				if(e.target.highlighted) {
-					e.target.highlighted = false;
-					formatColorNode(e.target);
-				}
-			};
-			node.onclick = function(e) {
-				if(nodeKeyDown) {
-					if(!selectingNode) {
-						selectingNode = true;
-						selectedNode = e.target;
-						selectedNode.clicked = true;
-						formatColorNode(selectedNode);
-					} else {
-						selectingNode = false;
-						selectedNode.clicked = false;
-						formatColorNode(selectedNode);
-						clickDiamond(selectedNode, e.target);
+			node.onmouseover = (function(grid) {
+				return function(e) {
+					if(nodeKeyDown) {
+						e.target.highlighted = true;
+						grid.formatColorNode(e.target);
 					}
-				}
-			}
+				};
+			})(this);
+			node.onmouseout = (function(grid) {
+				return function(e) {
+					if(e.target.highlighted) {
+						e.target.highlighted = false;
+						grid.formatColorNode(e.target);
+					}
+				};
+			})(this);
+			node.onclick = (function(grid) {
+				return function(e) {
+					if(nodeKeyDown) {
+						if(!selectingNode) {
+							selectingNode = true;
+							selectedNode = e.target;
+							selectedNode.clicked = true;
+							grid.formatColorNode(selectedNode);
+						} else {
+							selectingNode = false;
+							selectedNode.clicked = false;
+							grid.formatColorNode(selectedNode);
+							grid.clickDiamond(selectedNode, e.target);
+						}
+					}
+				};
+			})(this);
 			rowNodes.push(node);
 		}
-		tableNodes.push(rowNodes);
+		this.tableNodes.push(rowNodes);
 	}
 }
 
@@ -154,7 +156,7 @@ Grid.prototype.formatColorNode = function(node) {
 Grid.prototype.click = function(rect) {
 	if(!rect.tiled) {
 		rect.tiled = 1;
-		formatColorRect(rect);
+		this.formatColorRect(rect);
 	}
 }
 
@@ -164,14 +166,14 @@ Grid.prototype.toggleClick = function(rect) {
 	} else {
 		rect.tiled = 1;
 	}
-	formatColorRect(rect);
+	this.formatColorRect(rect);
 }
 
 Grid.prototype.clear = function() {
 	for(var i = 0; i < h; i++) {
 		for(var j = 0; j < w; j++) {
-			tableRects[i][j].tiled = 0;
-			formatColorRect(tableRects[i][j]);
+			this.tableRects[i][j].tiled = 0;
+			this.formatColorRect(tableRects[i][j]);
 		}
 	}
 }
@@ -189,7 +191,7 @@ Grid.prototype.inRect = function(p1, p2, p) {
 
 //p is within diamond with corners p1 and p2
 Grid.prototype.inDiamond = function(p1, p2, p) {
-	return inRect(rotateScale(p1), rotateScale(p2), rotateScale(p));
+	return this.inRect(this.rotateScale(p1), this.rotateScale(p2), this.rotateScale(p));
 }
 
 //Rotates by 45 and scales
@@ -204,7 +206,7 @@ Grid.prototype.clickRect = function(rect1, rect2) {
 	var p2 = [rect2.i + .5, rect2.j + .5];
 	for(var i = 0; i < h; i++) {
 		for(var j = 0; j < w; j++) {
-			if(inRect(p1, p2, [i + .5, j + .5])) click(tableRects[i][j]);
+			if(this.inRect(p1, p2, [i + .5, j + .5])) this.click(this.tableRects[i][j]);
 		}
 	}
 }
@@ -212,8 +214,8 @@ Grid.prototype.clickRect = function(rect1, rect2) {
 Grid.prototype.clickDiamond = function(node1, node2) {
 	for(var i = 0; i < h; i++) {
 		for(var j = 0; j < w; j++) {
-			if(inDiamond(node1.p, node2.p, [i + .5, j + .5])) {
-				click(tableRects[i][j]);
+			if(this.inDiamond(node1.p, node2.p, [i + .5, j + .5])) {
+				this.click(this.tableRects[i][j]);
 			}
 		}
 	}
@@ -302,13 +304,17 @@ Grid.prototype.computeTilings = function() {
 }
 
 function generateSVG() {
-	//set rects
-	rect.setAttribute('x', margin + j*(l + padding));
-	rect.setAttribute('y', margin + i*(l + padding));
-	rect.setAttribute('width', l);
-	rect.setAttribute('height', l);
-
-	//svg.appendChild
+	grid = new Grid(h, w);
+	for(var i = 0; i < h; i++) {
+		for(var j = 0; j < w; j++) {
+			svg.appendChild(grid.tableRects[i][j]);
+		}
+	}
+	for(var i = 0; i < h + 1; i++) {
+		for(var j = 0; j < w + 1; j++) {
+			svg.appendChild(grid.tableNodes[i][j]);
+		}
+	}
 
 	document.body.appendChild(svg);
 }
@@ -317,7 +323,7 @@ $(document).ready(function() {
 	generateSVG();
 
 	var calculateTilings = function() {
-		var tilings = computeTilings();
+		var tilings = grid.computeTilings();
 		document.getElementById("result").innerHTML = "Number of Tilings: " + tilings;
 	}
 	$('#calculator').click(function() {
@@ -337,7 +343,7 @@ $(document).ready(function() {
 			if(selectedNode) {
 				selectingNode = false;
 				selectedNode.clicked = false;
-				formatColorNode(selectedNode);
+				grid.formatColorNode(selectedNode);
 			}
 			nodeKeyDown = false;
 		}
@@ -345,7 +351,7 @@ $(document).ready(function() {
 			if(selectedTile) {
 				selectedTile.toTile = false;
 				selectingTile = false;
-				formatColorRect(selectedTile);
+				grid.formatColorRect(selectedTile);
 			}
 			tileKeyDown = false;
 		}
