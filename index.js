@@ -33,6 +33,7 @@ var selectedNode = null; //only valid when selectingNode
 var selectedTile = null; //only valid when selectingTile
 var selectingNode = false;
 var selectingTile =false;
+var mouseDiamond = null;
 // var nodeKey = 68;
 // var tileKey = 82;
 var nodeKey = 16;
@@ -124,10 +125,12 @@ var Grid = function(h, w) {
 							selectedNode.clicked = true;
 							grid.formatColorNode(selectedNode);
 						} else {
+							console.log("second click");
 							selectingNode = false;
 							selectedNode.clicked = false;
 							grid.formatColorNode(selectedNode);
 							grid.clickDiamond(selectedNode, e.target);
+							mouseDiamond.setAttribute('visibility', 'hidden');
 						}
 					}
 				};
@@ -349,6 +352,10 @@ var showTilingCalculation = function() {
 $(document).ready(function() {
 	grid = new Grid(h, w);
 	addGrid(grid);
+	mouseDiamond = document.createElementNS(svgNS,'rect');
+	mouseDiamond.setAttribute('fill', nodeSelectColor);
+	mouseDiamond.setAttribute('visibility', 'hidden');
+	svg.appendChild(mouseDiamond);
 	document.body.appendChild(svg);
 
 	$('#calculator').click(function() {
@@ -412,6 +419,7 @@ $(document).ready(function() {
 				selectingNode = false;
 				selectedNode.clicked = false;
 				grid.formatColorNode(selectedNode);
+				mouseDiamond.setAttribute('visibility', 'hidden');
 			}
 			nodeKeyDown = false;
 		}
@@ -426,6 +434,24 @@ $(document).ready(function() {
 	})
 
 	$(document).mousemove(function(e) {
-		// if(mouseDown) console.log(e);
+		if(nodeKeyDown && selectingNode) {
+			var x = e.pageX - $('#board').offset().left;
+			var y = e.pageY - $('#board').offset().top;
+			var cx = parseInt(selectedNode.getAttribute('cx'));
+			var cy = parseInt(selectedNode.getAttribute('cy'));
+
+			var width = ((y - cy) + (x - cx))/Math.SQRT2;
+			var height = ((y - cy) - (x - cx))/Math.SQRT2;
+
+			if(mouseDiamond.getAttribute('visibility') == 'hidden') {
+				mouseDiamond.setAttribute('visibility', 'visible');
+				mouseDiamond.setAttribute('transform', 'rotate(45 ' + cx + ' ' + cy + ')');
+			}
+
+			mouseDiamond.setAttribute('x', cx);
+			mouseDiamond.setAttribute('y', cy);
+			mouseDiamond.setAttribute('width', width);
+			mouseDiamond.setAttribute('height', height);
+		}
 	})
 });
