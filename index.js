@@ -36,8 +36,8 @@ var selectingTile =false;
 var mouseDiamond = null;
 // var nodeKey = 68;
 // var tileKey = 82;
-var nodeKey = 16;
-var tileKey = 91;
+var nodeKey = 91;
+var tileKey = 16;
 var calculateKey = 13;
 var nodeKeyDown = false;
 var tileKeyDown = false;
@@ -374,7 +374,7 @@ $(document).ready(function() {
 
 	$('#increase').click(function() {
 		removeGrid(grid);
-		document.body.removeChild(svg);
+		svg.removeChild(mouseDiamond);
 
 		var table = grid.returnTiled();
 		h++; w++;
@@ -385,13 +385,15 @@ $(document).ready(function() {
 				grid.formatColorRect(grid.tableRects[i][j]);
 			}
 		}
-		addGrid(grid);
-		document.body.appendChild(svg);
+		
+		addGridRects(grid);
+		svg.appendChild(mouseDiamond);
+		addGridNodes(grid);
 	})
 	$('#decrease').click(function() {
-		if(h > 0 && w > 0) {
+		if(h > 1 && w > 1) {
 			removeGrid(grid);
-			document.body.removeChild(svg);
+			svg.removeChild(mouseDiamond);
 
 			var table = grid.returnTiled();
 			h--; w--;
@@ -402,8 +404,10 @@ $(document).ready(function() {
 					grid.formatColorRect(grid.tableRects[i][j]);
 				}
 			}
-			addGrid(grid);
-			document.body.appendChild(svg);
+
+			addGridRects(grid);
+			svg.appendChild(mouseDiamond);
+			addGridNodes(grid);
 		}
 	})
 
