@@ -125,7 +125,6 @@ var Grid = function(h, w) {
 							selectedNode.clicked = true;
 							grid.formatColorNode(selectedNode);
 						} else {
-							console.log("second click");
 							selectingNode = false;
 							selectedNode.clicked = false;
 							grid.formatColorNode(selectedNode);
@@ -318,12 +317,15 @@ Grid.prototype.calculateTilings = function() {
 
 }
 
-function addGrid(grid) {
+function addGridRects(grid) {
 	for(var i = 0; i < grid.tableRects.length; i++) {
 		for(var j = 0; j < grid.tableRects[0].length; j++) {
 			svg.appendChild(grid.tableRects[i][j]);
 		}
 	}
+}
+
+function addGridNodes(grid) {
 	for(var i = 0; i < grid.tableNodes.length; i++) {
 		for(var j = 0; j < grid.tableNodes[0].length; j++) {
 			svg.appendChild(grid.tableNodes[i][j]);
@@ -346,21 +348,23 @@ function removeGrid(grid) {
 
 var showTilingCalculation = function() {
 	var tilings = grid.calculateTilings();
-	document.getElementById("result").innerHTML = "Number of Tilings: " + tilings;
+	document.getElementById("result").innerHTML = "<font size='3px'><b>Number of Tilings: " + tilings + "</b></font>";
 }
 
 $(document).ready(function() {
+	//Order is important! The nodes must remain clickable above the mouseDiamond
 	grid = new Grid(h, w);
-	addGrid(grid);
+	addGridRects(grid);
 	mouseDiamond = document.createElementNS(svgNS,'rect');
 	mouseDiamond.setAttribute('fill', nodeSelectColor);
 	mouseDiamond.setAttribute('visibility', 'hidden');
 	svg.appendChild(mouseDiamond);
+	addGridNodes(grid);
 	document.body.appendChild(svg);
 
 	$('#calculator').click(function() {
 		(function(callback) {
-			document.getElementById("result").innerHTML = "Number of Tilings: ";
+			document.getElementById("result").innerHTML = "<font size='3px'><b>Number of Tilings: </b></font>";
 			$.ajax({complete: showTilingCalculation});
 		})(showTilingCalculation);
 	});
@@ -450,8 +454,11 @@ $(document).ready(function() {
 
 			mouseDiamond.setAttribute('x', cx);
 			mouseDiamond.setAttribute('y', cy);
-			mouseDiamond.setAttribute('width', width);
-			mouseDiamond.setAttribute('height', height);
+
+			if(width > 0 && height > 0) {
+				mouseDiamond.setAttribute('width', width);
+				mouseDiamond.setAttribute('height', height);
+			}
 		}
 	})
 });

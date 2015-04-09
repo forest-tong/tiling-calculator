@@ -1,11 +1,19 @@
-/*h1 {
+body {
+	padding-top: 8px;
+	padding-right: 10px;
+}
+.starter-template {
+	padding: 40px 15px;
 	text-align: center;
 }
-
-.center {
-	margin-left: auto;
-	margin-right: auto;
-	margin: 0 auto;
-	width: 50%;
+#instructions {
+	padding-top: 8px;
+}
+#result {
+	padding-top: 8px;
+}
+/*.dropdown-toggle {
+	width: 500px;
+	text-overflow: ellipsis;
+	padding-right: 100px;
 }*/
-
