@@ -1,4 +1,7 @@
 function calculateTilings(table) {
+	var h = table.length;
+	var w = table[0].length;
+
 	var labels = [];
 	for(var i = 0; i < h; i++) {
 		var row = [];
@@ -51,17 +54,17 @@ function calculateTilings(table) {
 				}
 				if(j != 0) {
 					var leftLabel = labels[i][j - 1];
-					if(leftLabel != -1) K[label][leftLabel] = math.i;
+					if(leftLabel != -1) K[label][leftLabel] = self.math.i;
 				}
 				if(j != w - 1) {
 					var rightLabel = labels[i][j + 1];
-					if(rightLabel != -1) K[label][rightLabel] = math.i;
+					if(rightLabel != -1) K[label][rightLabel] = self.math.i;
 				}
 			}
 		}
 	}
 
-	var numTilings = math.det(math.matrix(K));
+	var numTilings = self.math.det(self.math.matrix(K));
 	if(typeof numTilings == "number") {
 		return numTilings;
 	} else {
@@ -72,6 +75,7 @@ function calculateTilings(table) {
 }
 
 self.addEventListener("message", function(e) {
+	importScripts('node_modules/mathjs/dist/math.js');
 	tilings = calculateTilings(e.data);
 	postMessage(tilings);
 });

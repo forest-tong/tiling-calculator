@@ -11,6 +11,13 @@ body {
 }
 #result {
 	padding-top: 8px;
+	-webkit-user-select: text;
+}
+.noSelect {
+    -webkit-user-select: none; /* webkit (safari, chrome) browsers */
+    -moz-user-select: none; /* mozilla browsers */
+    -khtml-user-select: none; /* webkit (konqueror) browsers */
+    -ms-user-select: none; /* IE10+ */
 }
 /*.dropdown-toggle {
 	width: 500px;

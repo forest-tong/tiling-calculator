@@ -8,10 +8,10 @@
 	<link rel="stylesheet" href="index.css">
 </head>
 
-<body>
+<body class="noSelect">
 
 	<ul class="nav nav-tabs" role="tablist">
-		<li role="presentation" class="active"><a href="home.html">Home</a></li>
+		<li role="presentation" class="active"><a href="index.html">Home</a></li>
 		<li role="presentation"><a href="about.html">About</a></li>
 	</ul>
 
@@ -22,19 +22,21 @@
 				<p id="instructions"><font size="3px"> Select a rectangular region by holding shift, followed by two corner squares of the region. <br>
 					Select an Aztec diamond-like region by holding command, followed by two corner vertices of the region.</font></p>
 					<p id="result"><font size="3px"><b>Number of Tilings:</b></font></p>
-				</div>
-				<div class="btn-toolbar" role="toolbar" aria-label="...">
-					<button type="button" class="btn btn-default btn-lg" id="calculator">Calculate</button>
-					<button type="button" class="btn btn-default btn-lg" id="increase">
-						<span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
-					</button>
-					<button type="button" class="btn btn-default btn-lg" id="decrease">
-						<span class="glyphicon glyphicon-minus" aria-hidden="true"></span>
-					</button>
-					<button type="button" class="btn btn-default btn-lg" id="clear">Clear</button>
-				</div>
-				<div id="boardDiv">
-					<svg id="board"></svg>
+				<div>
+					<div class="btn-toolbar" role="toolbar" aria-label="...">
+						<button type="button" class="btn btn-default btn-lg" id="calculator">Calculate</button>
+						<button type="button" class="btn btn-default btn-lg" id="stop">Stop</button>
+						<button type="button" class="btn btn-default btn-lg" id="increase">
+							<span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+						</button>
+						<button type="button" class="btn btn-default btn-lg" id="decrease">
+							<span class="glyphicon glyphicon-minus" aria-hidden="true"></span>
+						</button>
+						<button type="button" class="btn btn-default btn-lg" id="clear">Clear</button>
+					</div>
+					<div id="boardDiv">
+						<svg id="board"></svg>
+					</div>
 				</div>
 			</div>
 		</div>
@@ -42,6 +44,7 @@
 	<script src="jquery-1.11.1.js"></script>
 	<script src="node_modules/mathjs/dist/math.js"></script>
 	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+	<script src="tilingWorker.js"></script>
 	<script src="index.js"></script>
 
 </body>

@@ -271,13 +271,8 @@ function removeGrid(grid) {
 	}
 }
 
-// var showTilingCalculation = function() {
-// 	var tilings = grid.calculateTilings();
-// 	document.getElementById("result").innerHTML = "<font size='3px'><b>Number of Tilings: " + tilings + "</b></font>";
-// }
-
 $(document).ready(function() {
-	var w;
+	var webWorker;
 	//Order is important! The nodes must remain clickable above the mouseDiamond
 	grid = new Grid(h, w);
 	addGridRects(grid);
@@ -288,27 +283,50 @@ $(document).ready(function() {
 	addGridNodes(grid);
 	document.body.appendChild(svg);
 
-	$('#calculator').click(function() {
-		// (function(callback) {
-		// 	document.getElementById("result").innerHTML = "<font size='3px'><b>Number of Tilings: </b></font>";
-		// 	$.ajax({complete: showTilingCalculation});
-		// })(showTilingCalculation);
+	function startTilingCalculation() {
+		document.getElementById("result").innerHTML = "<font size='3px'><b>Number of Tilings: Calculating...</b></font>";
 		if(typeof(Worker) !== "undefined") {
-			if(typeof(w) == "undefined") {
-				w = new Worker("tilingWorker.js");
-				w.onmessage = function(event) {
-					document.getElementById("result").innerHTML = event.data;
+			if(typeof(webWorker) == "undefined") {
+				webWorker = new Worker("tilingWorker.js");
+				webWorker.onmessage = function(event) {
+					document.getElementById("result").innerHTML = "<font size='3px'><b>Number of Tilings: " + event.data + "</b></font>";
+					ongoing = false;
 				};
-			} else {
-				w.terminate();
-				w = undefined;
+				webWorker.postMessage(grid.returnTiled());
 			}
 		} else {
 			document.getElementById("result").innerHTML = "Sorry! No Web Worker support.";
 		}
+	}
+
+	function stopTilingCalculation() {
+		document.getElementById("result").innerHTML = "<font size='3px'><b>Number of Tilings: </b></font>";
+		if(typeof(Worker) !== "undefined") {
+			if(typeof(webWorker) !== "undefined") {
+				webWorker.terminate();
+				webWorker = undefined;
+			}
+		} else {
+			document.getElementById("result").innerHTML = "Sorry! No Web Worker support.";
+		}
+	}
+
+	var ongoing = false;
+	$('#calculator').click(function() {
+		if(!ongoing) {
+			ongoing = true;
+			startTilingCalculation();
+		}
 	});
+	$('#stop').click(function() {
+		if(ongoing) {
+			ongoing = false;
+			stopTilingCalculation();
+		}
+	})
 	$('#clear').click(function() {
 		grid.clear();
+		document.getElementById("result").innerHTML = "<font size='3px'><b>Number of Tilings: </b></font>";
 	});
 
 	$('#increase').click(function() {
@@ -354,10 +372,7 @@ $(document).ready(function() {
 		if(e.which == nodeKey) nodeKeyDown = true;
 		if(e.which == tileKey) tileKeyDown = true;
 		if(e.which == calculateKey) {
-			(function(callback) {
-				document.getElementById("result").innerHTML = "Number of Tilings: ";
-				$.ajax({complete: showTilingCalculation});
-			})(showTilingCalculation);
+			startTilingCalculation();
 		}
 	})
 	$(document).keyup(function(e) {
