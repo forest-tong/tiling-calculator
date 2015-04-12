@@ -1,2 +1,5 @@
 jsvectoreditor/
 prime_factorization.js
+webworker.*
+workerscript.js
+.DS_Store
