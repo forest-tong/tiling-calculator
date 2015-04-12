@@ -242,81 +242,6 @@ Grid.prototype.returnTiled = function() {
 	return table;
 }
 
-Grid.prototype.calculateTilings = function() {
-	var table = this.returnTiled();
-
-	var labels = [];
-	for(var i = 0; i < h; i++) {
-		var row = [];
-		for(var j = 0; j < w; j++) {
-			row.push(-1);
-		}
-		labels.push(row);
-	}
-
-	var evenCounter = 0;
-	var oddCounter = 0;
-	for(var i = 0; i < h; i++) {
-		for(var j = 0; j < w; j++) {
-			if(table[i][j] == 1) {
-				if((i + j) % 2 == 0) {
-					labels[i][j] = evenCounter;
-					evenCounter++;
-				} else {
-					labels[i][j] = oddCounter;
-					oddCounter++;
-				}
-			}
-		}
-	}
-
-	if(evenCounter == 0 || evenCounter != oddCounter) {
-		return 0;
-	}
-
-	var K = [];
-	for(var i = 0; i < evenCounter; i++) {
-		var row = [];
-		for(var j = 0; j < evenCounter; j++) {
-			row.push(0);
-		}
-		K.push(row);
-	}
-
-	for(var i = 0; i < h; i++) {
-		for(var j = 0; j < w; j++) {
-			var label = labels[i][j];
-			if((i + j) % 2 == 0 && label != -1) {
-				if(i != 0) {
-					var upperLabel = labels[i - 1][j];
-					if(upperLabel != -1) K[label][upperLabel] = 1;
-				}
-				if(i != h - 1) {
-					var lowerLabel = labels[i + 1][j];
-					if(lowerLabel != -1) K[label][lowerLabel] = 1;
-				}
-				if(j != 0) {
-					var leftLabel = labels[i][j - 1];
-					if(leftLabel != -1) K[label][leftLabel] = math.i;
-				}
-				if(j != w - 1) {
-					var rightLabel = labels[i][j + 1];
-					if(rightLabel != -1) K[label][rightLabel] = math.i;
-				}
-			}
-		}
-	}
-
-	var numTilings = math.det(math.matrix(K));
-	if(typeof numTilings == "number") {
-		return numTilings;
-	} else {
-		//One of these will be zero
-		return Math.abs(numTilings.re) + Math.abs(numTilings.im);
-	}
-
-}
-
 function addGridRects(grid) {
 	for(var i = 0; i < grid.tableRects.length; i++) {
 		for(var j = 0; j < grid.tableRects[0].length; j++) {
@@ -346,12 +271,13 @@ function removeGrid(grid) {
 	}
 }
 
-var showTilingCalculation = function() {
-	var tilings = grid.calculateTilings();
-	document.getElementById("result").innerHTML = "<font size='3px'><b>Number of Tilings: " + tilings + "</b></font>";
-}
+// var showTilingCalculation = function() {
+// 	var tilings = grid.calculateTilings();
+// 	document.getElementById("result").innerHTML = "<font size='3px'><b>Number of Tilings: " + tilings + "</b></font>";
+// }
 
 $(document).ready(function() {
+	var w;
 	//Order is important! The nodes must remain clickable above the mouseDiamond
 	grid = new Grid(h, w);
 	addGridRects(grid);
@@ -363,10 +289,23 @@ $(document).ready(function() {
 	document.body.appendChild(svg);
 
 	$('#calculator').click(function() {
-		(function(callback) {
-			document.getElementById("result").innerHTML = "<font size='3px'><b>Number of Tilings: </b></font>";
-			$.ajax({complete: showTilingCalculation});
-		})(showTilingCalculation);
+		// (function(callback) {
+		// 	document.getElementById("result").innerHTML = "<font size='3px'><b>Number of Tilings: </b></font>";
+		// 	$.ajax({complete: showTilingCalculation});
+		// })(showTilingCalculation);
+		if(typeof(Worker) !== "undefined") {
+			if(typeof(w) == "undefined") {
+				w = new Worker("tilingWorker.js");
+				w.onmessage = function(event) {
+					document.getElementById("result").innerHTML = event.data;
+				};
+			} else {
+				w.terminate();
+				w = undefined;
+			}
+		} else {
+			document.getElementById("result").innerHTML = "Sorry! No Web Worker support.";
+		}
 	});
 	$('#clear').click(function() {
 		grid.clear();

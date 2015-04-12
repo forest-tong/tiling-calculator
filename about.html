@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
+	<link rel="stylesheet" href="index.css">
+</head>
+
+<body>
+
+  <ul class="nav nav-tabs" role="tablist">
+    <li role="presentation"><a href="index.html">Home</a></li>
+    <li role="presentation" class="active"><a href="about.html">About</a></li>
+  </ul>
+
+  <div class="container-fluid">
+    <font size="3px">
+    <h2>About this project</h2>
+    <p>I built this simple tool for aiding researchers and students in "quick and dirty" experimentation of domino tilings on the square lattice. My hope is that you'll be able to easily use it to come up with and check new conjectures about domino tilings. </p>
+    <p>
+      Tiling Calculator is not intended to be used for larger or more systematic calculations; for this purpose, I recommend checking out <a href="http://faculty.uml.edu/jpropp/vaxmaple.c">vaxmaple</a>, a C program developed by Greg Kuperberg, Jim Propp, and David Wilson that can be used for calculating tilings with regions specified in VAX format.
+    </p>
+    <p>
+      The algorithm used in this app (which is written entirely in Javascript) is based off Adam Kalman's Mathematica code.
+    </p>
+    <h2>About me</h2>
+    <p><a href="/Users/ftong/Desktop/Website/index.html">My personal website</a></p>
+    <p>I am a student at MIT studying mathematics and computer science. My introduction to the weird and wonderful field of domino tilings was through a research project in 2013 under the mentorship of Henry Cohn, in which I studied divisibility of domino tilings for a class of graphs I defined "compound graphs." My paper can be found on the arXiv <a href="http://arxiv.org/pdf/1406.0669.pdf">here</a>. </p>
+    <p>Feel free to contact me with questions or feedback at ftong[at]mit.edu.</p>
+  </font>
+  </div>
+
+  <script src="jquery-1.11.1.js"></script>
+  <script src="node_modules/mathjs/dist/math.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+  <script src="index.js"></script>
+
+</body>
+</html>
