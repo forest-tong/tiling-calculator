@@ -1,3 +1,5 @@
+// Based off the Mathematica code by Adam Kalman
+
 function calculateTilings(table) {
 	var h = table.length;
 	var w = table[0].length;

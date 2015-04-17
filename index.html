@@ -12,22 +12,27 @@
 	<h1>Tiling Calculator</h1>
 	<ul class="nav nav-tabs" role="tablist">
 		<li role="presentation" class="active"><a href="index.html">Home</a></li>
+		<li role="presentation"><a href="examples.html">Examples</a></li>
 		<li role="presentation"><a href="about.html">About</a></li>
 	</ul>
 	<div class="container-fluid">
 		<div class="center">
 			<div style="width:810px">
 				<h4> Count the domino tilings of a region you define.</h4>
-				<p id="instructions"><font size="3px"> Select a rectangular region by holding shift, followed by two corner <i>squares</i> of the rectangle. <br>
-					Select an Aztec diamond-like region by holding command, followed by two corner <i>vertices</i> of the diamond.</font></p>
+				<p id="instructions"><font size="3px"> 
+					Select a rectangular region by holding shift, followed by two corner <i>squares</i> of the rectangle. <br>
+					Select an Aztec diamond-like region by holding command, followed by two corner <i>vertices</i> of the diamond. <br>
+					See examples <a href="examples.html">here</a>.
+				</font></p>
 				<div id="calculation">
 					<div class="well well-sm">
 						<p id="result">
-							<font size="3px"><b>Number of Tilings:</b></font>
+							Number of Tilings: 
 						</p>
 					</div>
 					<div class="btn-toolbar" role="toolbar" aria-label="...">
 						<button type="button" class="btn btn-default btn-lg" id="calculator">Calculate</button>
+						<button type="button" class="btn btn-default btn-lg" id="factorize">Factorize</button>
 						<button type="button" class="btn btn-default btn-lg" id="stop">Stop</button>
 						<div class="btn-group pull-right">
 							<button type="button" class="btn btn-default btn-lg" id="decrease">

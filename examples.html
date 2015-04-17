@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css">
+	<link rel="stylesheet" href="index.css">
+</head>
+
+<body>
+  <h1>Tiling Calculator</h1>
+  <ul class="nav nav-tabs" role="tablist">
+    <li role="presentation"><a href="index.html">Home</a></li>
+    <li role="presentation" class="active"><a href="examples.html">Examples</a></li>
+    <li role="presentation"><a href="about.html">About</a></li>
+  </ul>
+
+  <div class="container-fluid">
+    <h2>Selecting an Aztec Diamond</h2>
+    <p><font size="3px">
+      <div class="instruction">
+        While holding down command, mousing over the intersection points of the grid causes an orange circle to pop up, representing a clickable vertex.
+        <img src="selecting-vertex.png" alt="Orange circle around intersection point of grid" style="width:400px;height:400px">
+      </div>
+      <div class="instruction">
+        An orange diamond represents the squares that will be selected.
+        <img src="selecting-diamond.png" alt="Orange diamond" style="width:400px;height:400px">
+      </div>
+      <div class="instruction">
+        Aztec diamond selected!
+        <img src="selected-AD.png" alt="Aztec diamond selected" style="width:400px;height:400px">
+      </div>
+      <div class="instruction">
+        Note that Aztec rectangles can be selected in the same manner.
+      </div>
+    </font><p>
+    <div id="rectangle-instructions">
+      <h2>Selecting a Rectangle</h2>
+      <p><font size="3px">
+        <div class="instruction">
+          While holding down shift, click one square. This will be one corner of the rectangle.
+          <img src="selecting-square.png" alt="Orange square" style="width:400px;height:400px">
+        </div>
+        <div class="instruction">
+          Still holding down shift, click the opposite corner. Rectangle selected!
+          <img src="selected-rectangle.png" alt="Rectangle selected" style="width:400px;height:400px">
+        </div>
+      </p>
+    </div>
+  </div>
+</body>
+</html>

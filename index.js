@@ -272,6 +272,8 @@ function removeGrid(grid) {
 
 $(document).ready(function() {
 	var webWorker;
+	var factorizeWorker;
+	var numTilings;
 	//Order is important! The nodes must remain clickable above the mouseDiamond
 	grid = new Grid(h, w);
 	addGridRects(grid);
@@ -285,10 +287,11 @@ $(document).ready(function() {
 	function startTilingCalculation() {
 		if(typeof(Worker) !== "undefined") {
 			if(typeof(webWorker) === "undefined") {
-				document.getElementById("result").innerHTML = "<font size='3px'><b>Number of Tilings: Calculating...</b></font>";
+				document.getElementById("result").innerHTML = "Number of Tilings: Calculating...";
 				webWorker = new Worker("tilingWorker.js");
 				webWorker.onmessage = function(event) {
-					document.getElementById("result").innerHTML = "<font size='3px'><b>Number of Tilings: " + event.data + "</b></font>";
+					document.getElementById("result").innerHTML = "Number of Tilings: " + event.data;
+					numTilings = event.data;
 					webWorker.terminate();
 					webWorker = undefined;
 				};
@@ -304,7 +307,7 @@ $(document).ready(function() {
 	function stopTilingCalculation() {
 		if(typeof(Worker) !== "undefined") {
 			if(typeof(webWorker) !== "undefined") {
-				document.getElementById("result").innerHTML = "<font size='3px'><b>Number of Tilings: </b></font>";
+				document.getElementById("result").innerHTML = "Number of Tilings: ";
 				webWorker.terminate();
 				webWorker = undefined;
 			}
@@ -313,15 +316,54 @@ $(document).ready(function() {
 		}
 	}
 
+	function startFactorization() {
+		if(typeof(Worker) !== "undefined") {
+			if(numTilings !== null) {
+				if(typeof(factorizeWorker) === "undefined") {
+					// document.getElementById("result").innerHTML = "Number of Tilings: " + numTilings + " = Factorizing..."
+					factorizeWorker = new Worker("factorizeWorker.js");
+					factorizeWorker.onmessage = function(event) {
+						document.getElementById("result").innerHTML = "Number of Tilings: " + numTilings + " = " + event.data;
+						factorizeWorker.terminate();
+						factorizeWorker = undefined;
+					};
+					factorizeWorker.postMessage(numTilings);
+				} else {
+					console.log("Factorization already started");
+				}
+			} else {
+				console.log("Region has not been defined");
+			}
+		} else {
+			document.getElementById("result").innerHTML = "Sorry! No Web Worker support.";
+		}
+	}
+
+	function stopFactorization() {
+		if(typeof(Worker) !== "undefined") {
+			if(typeof(factorizeWorker) !== "undefined") {
+				document.getElementById("result").innerHTML = "Number of Tilings: " + numTilings;
+				factorizeWorker.terminate();
+				factorizeWorker = undefined;
+			}
+		} else {
+			document.getElementById("result").innerHTML = "Sorry! No Web Worker support.";
+		}
+	}
+	$('#factorize').click(function() {
+		startFactorization();
+	})
 	$('#calculator').click(function() {
 		startTilingCalculation();
 	});
 	$('#stop').click(function() {
 		stopTilingCalculation();
+		stopFactorization();
 	})
 	$('#clear').click(function() {
 		grid.clear();
-		document.getElementById("result").innerHTML = "<font size='3px'><b>Number of Tilings: </b></font>";
+		document.getElementById("result").innerHTML = "Number of Tilings: ";
+		numTilings = null;
 	});
 
 	$('#increase').click(function() {

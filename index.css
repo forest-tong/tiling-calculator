@@ -13,6 +13,10 @@ svg {
 	padding-top: 6px;
 	padding-left: 8px;
 }
+img {
+	padding-top: 6px;
+	display: block;
+}
 .nav-tabs {
 	padding-top: 4px;
 	padding-left: 0px;
@@ -20,6 +24,9 @@ svg {
 .starter-template {
 	padding: 40px 15px;
 	text-align: center;
+}
+.instruction {
+	padding-top: 14px;
 }
 /*#instructions {
 	padding-top: 12px;
@@ -30,6 +37,11 @@ svg {
 #result {
 	padding-top: 6px;
 	-webkit-user-select: text;
+	font-size: 120%;
+	font-weight: bold;
+}
+#rectangle-instructions {
+	padding-top: 20px;
 }
 .noSelect {
     -webkit-user-select: none; /* webkit (safari, chrome) browsers */
