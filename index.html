@@ -9,30 +9,35 @@
 </head>
 
 <body class="noSelect">
-
+	<h1>Tiling Calculator</h1>
 	<ul class="nav nav-tabs" role="tablist">
 		<li role="presentation" class="active"><a href="index.html">Home</a></li>
 		<li role="presentation"><a href="about.html">About</a></li>
 	</ul>
-
 	<div class="container-fluid">
-		<h1>Tiling Calculator</h1>
 		<div class="center">
-			<div>
-				<p id="instructions"><font size="3px"> Select a rectangular region by holding shift, followed by two corner squares of the region. <br>
-					Select an Aztec diamond-like region by holding command, followed by two corner vertices of the region.</font></p>
-					<p id="result"><font size="3px"><b>Number of Tilings:</b></font></p>
-				<div>
+			<div style="width:810px">
+				<h4> Count the domino tilings of a region you define.</h4>
+				<p id="instructions"><font size="3px"> Select a rectangular region by holding shift, followed by two corner <i>squares</i> of the rectangle. <br>
+					Select an Aztec diamond-like region by holding command, followed by two corner <i>vertices</i> of the diamond.</font></p>
+				<div id="calculation">
+					<div class="well well-sm">
+						<p id="result">
+							<font size="3px"><b>Number of Tilings:</b></font>
+						</p>
+					</div>
 					<div class="btn-toolbar" role="toolbar" aria-label="...">
 						<button type="button" class="btn btn-default btn-lg" id="calculator">Calculate</button>
 						<button type="button" class="btn btn-default btn-lg" id="stop">Stop</button>
-						<button type="button" class="btn btn-default btn-lg" id="increase">
-							<span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
-						</button>
-						<button type="button" class="btn btn-default btn-lg" id="decrease">
-							<span class="glyphicon glyphicon-minus" aria-hidden="true"></span>
-						</button>
-						<button type="button" class="btn btn-default btn-lg" id="clear">Clear</button>
+						<div class="btn-group pull-right">
+							<button type="button" class="btn btn-default btn-lg" id="decrease">
+								<span class="glyphicon glyphicon-minus" aria-hidden="true"></span>
+							</button>
+							<button type="button" class="btn btn-default btn-lg" id="increase">
+								<span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+							</button>
+						</div>
+						<button type="button" class="btn btn-default btn-lg pull-right" id="clear">Clear</button>
 					</div>
 					<div id="boardDiv">
 						<svg id="board"></svg>

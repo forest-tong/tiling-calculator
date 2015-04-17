@@ -1,16 +1,34 @@
 body {
-	padding-top: 8px;
+	padding-top: 4px;
 	padding-right: 10px;
+	padding-left: 8px;
+}
+h1 {
+	padding-left: 8px;
+}
+h4 {
+	padding-top: 4px;
+}
+svg {
+	padding-top: 6px;
+	padding-left: 8px;
+}
+.nav-tabs {
+	padding-top: 4px;
+	padding-left: 0px;
 }
 .starter-template {
 	padding: 40px 15px;
 	text-align: center;
 }
-#instructions {
-	padding-top: 8px;
+/*#instructions {
+	padding-top: 12px;
+}*/
+#calculation {
+	padding-top:8px;
 }
 #result {
-	padding-top: 8px;
+	padding-top: 6px;
 	-webkit-user-select: text;
 }
 .noSelect {

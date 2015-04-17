@@ -3,10 +3,9 @@ Tiling Calculator
 Forest Tong
 **/
 //TODO:
-//button for stopping calculation
-//Some way of recording numbers
-//Explanation of how to use it
-//better way of showing busy
+//Some way of recording numbers?
+//make Aztec rectangle work in other directions of selection
+//option to apply checkerboard coloring
 
 var padding = 1;
 var nodeRadius = 7;
@@ -17,7 +16,7 @@ var pickedColor = '#A0C4EB';
 var nodeSelectColor = 'rgba(255, 153, 0, 0.4)';
 var tileSelectColor = nodeSelectColor;
 var invis = 'rgba(0, 0, 0, 0)';
-var boardWidth = 1010;
+var boardWidth = 810;
 var boardHeight = boardWidth;
 var h = 10;
 var w = 10;
@@ -284,15 +283,18 @@ $(document).ready(function() {
 	document.body.appendChild(svg);
 
 	function startTilingCalculation() {
-		document.getElementById("result").innerHTML = "<font size='3px'><b>Number of Tilings: Calculating...</b></font>";
 		if(typeof(Worker) !== "undefined") {
-			if(typeof(webWorker) == "undefined") {
+			if(typeof(webWorker) === "undefined") {
+				document.getElementById("result").innerHTML = "<font size='3px'><b>Number of Tilings: Calculating...</b></font>";
 				webWorker = new Worker("tilingWorker.js");
 				webWorker.onmessage = function(event) {
 					document.getElementById("result").innerHTML = "<font size='3px'><b>Number of Tilings: " + event.data + "</b></font>";
-					ongoing = false;
+					webWorker.terminate();
+					webWorker = undefined;
 				};
 				webWorker.postMessage(grid.returnTiled());
+			} else {
+				console.log("Calculation already started");
 			}
 		} else {
 			document.getElementById("result").innerHTML = "Sorry! No Web Worker support.";
@@ -300,9 +302,9 @@ $(document).ready(function() {
 	}
 
 	function stopTilingCalculation() {
-		document.getElementById("result").innerHTML = "<font size='3px'><b>Number of Tilings: </b></font>";
 		if(typeof(Worker) !== "undefined") {
 			if(typeof(webWorker) !== "undefined") {
+				document.getElementById("result").innerHTML = "<font size='3px'><b>Number of Tilings: </b></font>";
 				webWorker.terminate();
 				webWorker = undefined;
 			}
@@ -311,18 +313,11 @@ $(document).ready(function() {
 		}
 	}
 
-	var ongoing = false;
 	$('#calculator').click(function() {
-		if(!ongoing) {
-			ongoing = true;
-			startTilingCalculation();
-		}
+		startTilingCalculation();
 	});
 	$('#stop').click(function() {
-		if(ongoing) {
-			ongoing = false;
-			stopTilingCalculation();
-		}
+		stopTilingCalculation();
 	})
 	$('#clear').click(function() {
 		grid.clear();
