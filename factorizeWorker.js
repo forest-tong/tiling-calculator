@@ -40,7 +40,6 @@ function toFactorPowerList(factors) {
 }
 
 function factorize(numTilings) {
-	console.log("hello");
 	if(numTilings == 0) {
 		return "0";
 	} else if(numTilings == 1) {

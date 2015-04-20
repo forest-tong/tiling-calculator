@@ -364,6 +364,8 @@ $(document).ready(function() {
 		grid.clear();
 		document.getElementById("result").innerHTML = "Number of Tilings: ";
 		numTilings = null;
+		stopTilingCalculation();
+		stopFactorization();
 	});
 
 	$('#increase').click(function() {
