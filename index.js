@@ -36,6 +36,8 @@ var mouseDiamond = null;
 // var nodeKey = 68;
 // var tileKey = 82;
 var nodeKey = 91;
+var nodeKeyRight = 93;
+var nodeKeyFirefox = 224;
 var tileKey = 16;
 var calculateKey = 13;
 var nodeKeyDown = false;
@@ -408,14 +410,14 @@ $(document).ready(function() {
 	})
 
 	$(document).keydown(function(e) {
-		if(e.which == nodeKey) nodeKeyDown = true;
+		if(e.which == nodeKey || e.which == nodeKeyRight || e.which == nodeKeyFirefox) nodeKeyDown = true;
 		if(e.which == tileKey) tileKeyDown = true;
 		if(e.which == calculateKey) {
 			startTilingCalculation();
 		}
 	})
 	$(document).keyup(function(e) {
-		if(e.which == nodeKey) {
+		if(e.which == nodeKey || e.which == nodeKeyRight || e.which == nodeKeyFirefox) {
 			if(selectedNode) {
 				selectingNode = false;
 				selectedNode.clicked = false;
